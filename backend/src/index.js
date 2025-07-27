@@ -2,12 +2,12 @@ const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
 dotenv.config();
+const app = express();
 app.use(cors());
 const weatherRouter = require('./routes/weather');
 const alertsRouter = require('./routes/alerts');
 const evaluateRouter = require('./routes/evaluate');
 
-const app = express();
 app.use(express.json());
 
 app.get('/', (req, res) => {

@@ -9,7 +9,7 @@ router.post("/", async (req, res) => {
   if (key !== process.env.EVALUATE_SECRET) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
-  
+
   try {
     const result = await db.query("SELECT * FROM alerts");
     const alerts = result.rows;
@@ -18,9 +18,9 @@ router.post("/", async (req, res) => {
     // Group alerts by location for better performance and less API calls
     const grouped = new Map();
     for (const alert of alerts) {
-      const key = alert.location;
-      if (!grouped.has(key)) grouped.set(key, []);
-      grouped.get(key).push(alert);
+      const locationKey = alert.location;
+      if (!grouped.has(locationKey)) grouped.set(locationKey, []);
+      grouped.get(locationKey).push(alert);
     } 
     
     // Evaluate all alerts for location
