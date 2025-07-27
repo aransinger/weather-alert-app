@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
+const API = import.meta.env.VITE_WEATHER_API_URL;
 
 function State() {
   const [alerts, setAlerts] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('http://localhost:3000/alerts')
+    fetch(`${API}/alerts`)
       .then(res => res.json())
       .then(data => {
         setAlerts(data.filter(a => a.triggered));

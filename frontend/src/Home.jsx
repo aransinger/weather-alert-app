@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
 
+const API = import.meta.env.VITE_WEATHER_API_URL;
+
 function Home() {
   const [location, setLocation] = useState('Tel Aviv-Yafo');
   const [weather, setWeather] = useState(null);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    fetch(`http://localhost:3000/weather?location=${encodeURIComponent(location)}`)
+    fetch(`${API}/weather?location=${encodeURIComponent(location)}`)
       .then(res => {
         if (!res.ok) throw new Error('Weather fetch failed');
         return res.json();
