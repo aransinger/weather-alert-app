@@ -23,6 +23,39 @@ function Alerts() {
     setForm({ ...form, [e.target.name]: e.target.value });
   }
 
+  async function getCurrentLocation() {
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported by your browser.");
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const lat = pos.coords.latitude;
+        const lon = pos.coords.longitude;
+
+        try {
+          const res = await fetch(`${API}/weather?location=${lat},${lon}`);
+          const data = await res.json();
+
+          // Use the original coordinates as fallback
+          const name = `${lat.toFixed(4)},${lon.toFixed(4)}`;
+
+          // If response includes a resolved name/location, prefer it
+          const resolved = data.resolvedAddress || data.location || name;
+
+          setForm((prev) => ({ ...prev, location: resolved }));
+        } catch (err) {
+          console.error("Failed to get city name:", err);
+          setForm((prev) => ({ ...prev, location: `${lat},${lon}` }));
+        }
+      },
+      (err) => {
+        alert("Failed to get location: " + err.message);
+      }
+    );
+  }
+  
   async function handleSubmit(e) {
     e.preventDefault();
     const { operator, value, ...rest } = form;
@@ -62,14 +95,25 @@ function Alerts() {
           required
           className="p-2 border border-gray-300 rounded"
         />
-        <input
-          name="location"
-          placeholder="Location"
-          value={form.location}
-          onChange={handleChange}
-          required
-          className="p-2 border border-gray-300 rounded"
-        />
+        <div className="flex gap-2 items-center">
+          <input
+            name="location"
+            placeholder="Location"
+            value={form.location}
+            onChange={handleChange}
+            required
+            className="flex-1 p-2 border border-gray-300 rounded"
+          />
+          <button
+            type="button"
+            onClick={getCurrentLocation}
+            className="px-3 py-2 bg-gray-100 border border-gray-300 rounded hover:bg-gray-200"
+            title="Use your location"
+          >
+            📍 My Location
+          </button>
+        </div>
+
         <select
           name="parameter"
           value={form.parameter}
