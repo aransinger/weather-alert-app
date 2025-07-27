@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+const API = import.meta.env.VITE_WEATHER_API_URL;
 
 function Alerts() {
   const [alerts, setAlerts] = useState([]);
@@ -11,7 +12,7 @@ function Alerts() {
   });
 
   useEffect(() => {
-    fetch('http://localhost:3000/alerts')
+    fetch(`${API}/alerts`)
       .then(res => res.json())
       .then(setAlerts)
       .catch(console.error);
@@ -24,7 +25,7 @@ function Alerts() {
   async function handleSubmit(e) {
     e.preventDefault();
 
-    const res = await fetch('http://localhost:3000/alerts', {
+    const res = await fetch(`${API}/alerts`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(form),
