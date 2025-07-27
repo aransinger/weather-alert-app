@@ -1,0 +1,14 @@
+# Node
+node_modules/
+.env
+package-lock.json
+
+# Vite
+dist/
+
+# OS + IDE
+.DS_Store
+.vscode/
+
+# Logs
+*.log
