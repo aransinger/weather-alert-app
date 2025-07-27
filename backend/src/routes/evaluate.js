@@ -5,6 +5,11 @@ const db = require("../db");
 const router = express.Router();
 
 router.post("/", async (req, res) => {
+  const key = req.headers['x-api-key'];
+  if (key !== process.env.EVALUATE_SECRET) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  
   try {
     const result = await db.query("SELECT * FROM alerts");
     const alerts = result.rows;
