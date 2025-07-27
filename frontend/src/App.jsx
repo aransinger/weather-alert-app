@@ -13,7 +13,7 @@ function App() {
     <Router>
       <div className="min-h-screen bg-[#F5F7FA] text-gray-800">
         <header className="bg-white shadow p-4 mb-2">
-          <h1 className="text-4xl font-bold text-[#0066FF]">Weather Alerts</h1>
+          <h1 className="text-4xl font-bold text-[#0066FF]">🌤️ Weather Alerts</h1>
         </header>
 
         <nav className="bg-white shadow-sm p-3 flex justify-center gap-10 text-lg mb-6">
