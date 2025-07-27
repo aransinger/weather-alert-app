@@ -1,8 +1,18 @@
 const axios = require('axios');
 
-async function getWeather(location) {
-    const url = 'https://api.tomorrow.io/v4/weather/realtime';
+const cache = new Map();
 
+async function getWeather(location) {
+  const key = location.toLowerCase().trim();
+
+  if (cache.has(key)) {
+    const { timestamp, data } = cache.get(key);
+    if (Date.now() - timestamp < 60_000) {
+      return data;
+    }
+  }
+
+  const url = 'https://api.tomorrow.io/v4/weather/realtime';
   const response = await axios.get(url, {
     params: {
       location,
@@ -11,11 +21,14 @@ async function getWeather(location) {
   });
 
   const values = response.data.data.values;
-  return {
+  const weather = {
     temperature: values.temperature,
     windSpeed: values.windSpeed,
     precipitation: values.precipitationIntensity || 0
   };
+
+  cache.set(key, { timestamp: Date.now(), data: weather });
+  return weather;
 }
 
 module.exports = { getWeather };
