@@ -14,11 +14,13 @@ router.post("/", async (req, res) => {
     const result = await db.query("SELECT * FROM alerts");
     const alerts = result.rows;
     const updated = [];
+    const triggeredIds = [];
+    const clearedIds = [];
     
     // Group alerts by location for better performance and less API calls
     const grouped = new Map();
     for (const alert of alerts) {
-      const locationKey = alert.location;
+      const locationKey = alert.location.trim();
       if (!grouped.has(locationKey)) grouped.set(locationKey, []);
       grouped.get(locationKey).push(alert);
     } 
@@ -35,7 +37,7 @@ router.post("/", async (req, res) => {
       
       for (const alert of alertsForLocation) {
         const paramValue = parseFloat(weather[alert.parameter]);
-    
+        
         const match = alert.threshold.match(/(>=|<=|>|<|==)\s*([\d.]+)/);
         if (!match) continue;
 
@@ -51,14 +53,26 @@ router.post("/", async (req, res) => {
           case "==": triggered = paramValue === thresholdValue; break;
         }
 
-        await db.query("UPDATE alerts SET triggered = $1 WHERE id = $2", 
-          [triggered,alert.id]
-        );
-
         updated.push({ id: alert.id, triggered });
+        if (triggered) {
+          triggeredIds.push(alert.id);
+        } else {
+          clearedIds.push(alert.id);
+        }
       }
     }
-
+    if (triggeredIds.length > 0) {
+      await db.query(
+        'UPDATE alerts SET triggered = TRUE WHERE id = ANY($1::int[])',
+        [triggeredIds]
+      );
+    }
+    if (clearedIds.length > 0) {
+      await db.query(
+        'UPDATE alerts SET triggered = FALSE WHERE id = ANY($1::int[])',
+        [clearedIds]
+      );
+    }
     res.json({ updated });
   } catch (err) {
     console.error('Failed to evaluate alerts:', err);
