@@ -14,13 +14,13 @@ async function processQueue() {
   processing = true;
 
   while (queue.length > 0) {
-    const { location, resolve, reject } = queue.shift();
+    const { key, resolve, reject } = queue.shift();
 
     try {
       const url = 'https://api.tomorrow.io/v4/weather/realtime';
       const response = await axios.get(url, {
         params: {
-          location,
+          location: key,
           apikey: process.env.TOMORROW_API_KEY
         }
       });
@@ -32,10 +32,10 @@ async function processQueue() {
         precipitation: values.precipitationIntensity || 0
       };
 
-      cache.set(location, { timestamp: Date.now(), data: weather });
+      cache.set(key, { timestamp: Date.now(), data: weather });
       resolve(weather);
     } catch (err) {
-      console.error(`Error calling Tomorrow.io API for location "${location}":`, err.message);
+      console.error(`Error calling Tomorrow.io API for location "${key}":`, err.message);
       reject(err);
     }
 
@@ -50,11 +50,14 @@ async function getWeather(location) {
 
   if (cache.has(key)) {
     const { timestamp, data } = cache.get(key);
-    if (Date.now() - timestamp < 60_000) return data;
+    if (Date.now() - timestamp < 60_000) {
+      console.log('Weather cache hit for:', key);
+      return data;
+    }
   }
 
   return new Promise((resolve, reject) => {
-    queue.push({ location, resolve, reject });
+    queue.push({ key, resolve, reject });
     processQueue();
   });
 }
