@@ -35,6 +35,7 @@ async function processQueue() {
       cache.set(location, { timestamp: Date.now(), data: weather });
       resolve(weather);
     } catch (err) {
+      console.error(`Error calling Tomorrow.io API for location "${location}":`, err.message);
       reject(err);
     }
 
